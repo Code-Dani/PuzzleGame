@@ -17,6 +17,7 @@ using System.Windows.Shapes;
 using System.Media;
 using WMPLib;
 using System.Windows.Threading;
+using System.Timers;
 
 namespace PuzzleGame
 {
@@ -25,19 +26,19 @@ namespace PuzzleGame
     /// </summary>
     public partial class MainWindow : Window
     {
-        String gridSize = "4x4";
-        List<Image> cardPool;
-        Image back_of_card;
-        MediaPlayer player;
-        DispatcherTimer timer;
-        int seconds = 0;
-        int minutes = 0;
+        private String gridSize = "4x4";
+        private List<Image> cardPool;
+        private Image back_of_card;
+        private MediaPlayer player;
+        private Timer timer;
+        private Stopwatch _stopwatch;
+        
 
         public MainWindow()
         {
-            timer = new DispatcherTimer();
-            timer.Tick += Timer_Tick;
-            timer.Interval = TimeSpan.FromSeconds(1);
+            timer = new Timer(1000);
+            timer.Elapsed += Timer_Elapsed;
+            _stopwatch = new Stopwatch();
 
             player = new MediaPlayer();
             player.Open(new Uri(@"..\..\Music\track.wav", UriKind.Relative));
@@ -47,12 +48,12 @@ namespace PuzzleGame
             player.Play();
         }
 
-        private void Timer_Tick(object sender, EventArgs e)
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            seconds++;
-            Console.WriteLine("entro");
-            T_timer.Text = seconds.ToString();
-            //T_timer.Text = TimeSpan.FromSeconds(seconds).ToString("mm\\:ss");
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                T_timer.Text = _stopwatch.Elapsed.ToString(@"hh\:mm\:ss");
+            });
         }
 
         public void defineVariables()
@@ -88,7 +89,7 @@ namespace PuzzleGame
         }
         private void BT_play_Click(object sender, RoutedEventArgs e)
         {
-
+            _stopwatch.Start();
             timer.Start();
             cardPool = cardPool.OrderBy(a => Guid.NewGuid()).ToList();  //scramble pool list
             cardPool = cardPool.OrderBy(a => Guid.NewGuid()).ToList();  //scramble pool list
@@ -139,8 +140,8 @@ namespace PuzzleGame
             }
 
             //Setting up field
-            playfield.Visibility = Visibility.Visible;
-            playfield.IsEnabled = true;
+            G_contenitore.Visibility = Visibility.Visible;
+            G_contenitore.IsEnabled = true;
             G_mm.Visibility = Visibility.Hidden;
             G_mm.IsEnabled = false;
             
@@ -188,6 +189,7 @@ namespace PuzzleGame
             main.IsEnabled = false;
         }
 
+        #region //Apply button
         private void BT_apply_Click(object sender, RoutedEventArgs e)
         {
             Grid settings = G_settings;
@@ -198,6 +200,13 @@ namespace PuzzleGame
 
             main.Visibility = Visibility.Visible;
             main.IsEnabled = true;
+        }
+        #endregion
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            timer.Stop();
+            _stopwatch.Stop();
         }
     }
 }

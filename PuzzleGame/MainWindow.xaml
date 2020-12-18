@@ -14,7 +14,7 @@
         TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
-        >
+        Closed="Window_Closed">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -54,7 +54,9 @@
         </Grid>
 
         <!--Memory Game, play field -->
-        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,5,0,0" Name="G_playfield" Grid.Row="1" IsEnabled="False" Visibility="Hidden" Width="640" Height="640">
+        <Grid x:Name="G_contenitore" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" IsEnabled="False" Visibility="Hidden">
+            <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,5,0,0" Name="G_playfield" Grid.Row="1" IsEnabled="True" Visibility="Visible" Width="640" Height="640">
+            </Grid>
             <TextBlock Width="250" Height="200" FontSize="40" Name="T_timer" Margin="-303,26,693,414" Text="Test" ></TextBlock>
         </Grid>
     </Grid>

@@ -36,6 +36,7 @@ namespace PuzzleGame
         private Image previousImage;
         private int scorePoints = 0;
         private int endCount = 1;
+        private bool winner = false;
 
         public MainWindow()
         {
@@ -51,62 +52,49 @@ namespace PuzzleGame
             player.Play();
         }
 
-        public void defineVariables()
-        {
-            back_of_card = new Image
-            {
-                Source = new BitmapImage(new Uri("/Images/back.png", UriKind.Relative)),
-                Width = 160,
-                Height = 160,
-                Stretch = Stretch.Fill,
-                Margin = new Thickness(1, 1, 1, 1)
-            };
-            cardPool = new List<Image>();
-            int count = 0;
-            foreach (var file in Directory.GetFiles(Directory.GetCurrentDirectory() + "../../../Images/cards"))
-            {
-                cardPool.Add(new Image
-                {
-                    Source = new BitmapImage(new Uri("/Images/cards/"+ System.IO.Path.GetFileName(file), UriKind.Relative)), 
-                    Width = 160,
-                    Height = 160,
-                    Stretch = Stretch.Fill,
-                    Margin = new Thickness(1, 1, 1, 1),
-                    Name = "test" + count.ToString(),
-                    Tag = "dwokd"
-                });
-                count++;
-            }
-        }
-        private void DSlink_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            Process.Start("https://discord.gg/cHx4kNXpVa");
-        }
         private void BT_play_Click(object sender, RoutedEventArgs e)
         {
+            //setting up timer and stopwatch
             _stopwatch.Start();
             timer.Start();
-            cardPool = cardPool.OrderBy(a => Guid.NewGuid()).ToList();  //scramble pool list
-            //Declarations
-            Grid playfield = G_playfield;
-            
-
-            //creating field            TEMP - WILL BE MOVED INTO A NON SO CALLED METHOD
+            G_playfield.Children.Clear();
+            G_playfield.RowDefinitions.Clear();
+            G_playfield.ColumnDefinitions.Clear();
+            //creating field
             int rows = int.Parse(gridSize.Split('x')[0]), columns = int.Parse(gridSize.Split('x')[1]), counter = 0;
             int _cardsNeeded = (rows * columns) / 2;
+            if ((rows * columns) <= 16)
+            {
+                for (int i = 0; i < columns; i++)
+                {
+                    var GRIDcolumns = new ColumnDefinition();
+                    GRIDcolumns.Width = new GridLength(150);
+                    G_playfield.ColumnDefinitions.Add(GRIDcolumns);
+                }
+                for (int j = 0; j < rows; j++)
+                {
+                    var GRIDrows = new RowDefinition();
+                    GRIDrows.Height = new GridLength(150);
+                    G_playfield.RowDefinitions.Add(GRIDrows);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < columns; i++)
+                {
+                    var GRIDcolumns = new ColumnDefinition();
+                    GRIDcolumns.Width = new GridLength(90);
+                    G_playfield.ColumnDefinitions.Add(GRIDcolumns);
+                }
+                for (int j = 0; j < rows; j++)
+                {
+                    var GRIDrows = new RowDefinition();
+                    GRIDrows.Height = new GridLength(90);
+                    G_playfield.RowDefinitions.Add(GRIDrows);
+                }
+            }
+            cardPool = cardPool.OrderBy(a => Guid.NewGuid()).ToList();  //scramble pool list
 
-            for (int i = 0; i < columns; i++)
-            {
-                var GRIDcolumns = new ColumnDefinition();
-                GRIDcolumns.Width = new GridLength(150);
-                playfield.ColumnDefinitions.Add(GRIDcolumns);
-            }
-            for (int j = 0; j < rows; j++)
-            {
-                var GRIDrows = new RowDefinition();
-                GRIDrows.Height = new GridLength(150);
-                playfield.RowDefinitions.Add(GRIDrows);
-            }
             //initialize new card set made for this game
             cardSet = new List<Image>();
             int tmp = _cardsNeeded - 1;
@@ -119,8 +107,8 @@ namespace PuzzleGame
                 var tmpIm = new Image()
                 {
                     Source = cardPool[i].Source,
-                    Width = cardPool[i].Width,
-                    Height = cardPool[i].Height,
+                    HorizontalAlignment = cardPool[i].HorizontalAlignment,
+                    VerticalAlignment = cardPool[i].VerticalAlignment,
                     Stretch = cardPool[i].Stretch,
                     Margin = cardPool[i].Margin,
                     Name = "test" + (tmp + 20),
@@ -128,10 +116,7 @@ namespace PuzzleGame
                 };
                 cardSet.Add(tmpIm);  //obviously this way they'll always end up one next to the other, but to make it simplier we'll just scramble it after
             }
-
             cardSet = cardSet.OrderBy(a => Guid.NewGuid()).ToList();
-
-            counter = 0; //counter reset
 
             for (int i = 0; i < rows; i++)
             {
@@ -140,8 +125,8 @@ namespace PuzzleGame
                     var back = new Image
                     {
                         Source = new BitmapImage(new Uri("/Images/back.png", UriKind.Relative)),
-                        Width = 160,
-                        Height = 160,
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
+                        VerticalAlignment = VerticalAlignment.Stretch,
                         Stretch = Stretch.Fill,
                         Margin = new Thickness(1, 1, 1, 1),
                         Name = "back" + counter,
@@ -150,74 +135,121 @@ namespace PuzzleGame
                     back.MouseUp += Back_MouseUp;
                     cardSet[counter].Tag = counter.ToString();
 
-                    playfield.Children.Add(back);
+                    G_playfield.Children.Add(back);
                     Grid.SetRow(back, i);
                     Grid.SetColumn(back, j);
                     counter++;
                 }
             }
-
             //Setting up field
             switchGridSettings(true, G_contenitore);
             switchGridSettings(false, G_mm);
+        }
+        public void defineVariables()
+        {
+            back_of_card = new Image
+            {
+                Source = new BitmapImage(new Uri("/Images/back.png", UriKind.Relative)),
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Stretch,
+                Stretch = Stretch.Fill,
+                Margin = new Thickness(1, 1, 1, 1)
+            };
+            cardPool = new List<Image>();
+            int count = 0;
+            foreach (var file in Directory.GetFiles(Directory.GetCurrentDirectory() + "../../../Images/cards"))
+            {
+                cardPool.Add(new Image
+                {
+                    Source = new BitmapImage(new Uri("/Images/cards/"+ System.IO.Path.GetFileName(file), UriKind.Relative)), 
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    VerticalAlignment = VerticalAlignment.Stretch,
+                    Stretch = Stretch.Fill,
+                    Margin = new Thickness(1, 1, 1, 1),
+                    Name = "test" + count.ToString(),
+                    Tag = "dwokd"
+                });
+                count++;
+            }
+        }
+        private void DSlink_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            Process.Start("https://discord.gg/cHx4kNXpVa");
         }
         private void Back_MouseUp(object sender, MouseButtonEventArgs e)
         {
             Image img = (Image)sender;
             bool hit = false;
+            
+            Console.WriteLine(img.Source + "\n" + img.Tag);
 
-            foreach(var item in cardSet)
+            if (winner != true)
             {
-                if(img.Tag.ToString() == item.Tag.ToString())
+                foreach (var item in cardSet)
                 {
-                    if (img.Name.Contains("back"))
+                    if (img.Tag.ToString() == item.Tag.ToString())
                     {
-                        img.Source = item.Source;
-                        img.Name = img.Name.Replace("back", "front");
-                        hit = false;
-                        if (previousImage != null)
+                        if (img.Name.Contains("z"))
                         {
-                            if (img.Source == previousImage.Source)
+                            if (previousImage != null)
                             {
-                                img.Name = img.Name.Replace("front", "a");
-                                previousImage.Name = previousImage.Name.Replace("front", "a");
-                                previousImage = null;
-                                scorePoints = scorePoints + 15;
-                                T_score.Text = "Score: " + string.Format("{0:0}", ((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds));
-                                if(((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) >= 100)
-                                {
-                                    T_score.Foreground = Brushes.Gold;
-                                }
-                                if(((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) >= 60 && ((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) < 100)
-                                {
-                                    T_score.Foreground = Brushes.Green;
-                                }
-                                if (((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) >= 30 && ((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) < 60)
-                                {
-                                    T_score.Foreground = Brushes.Yellow;
-                                }
-                                if (((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) >= 0 && ((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) < 30)
-                                {
-                                    T_score.Foreground = Brushes.Red;
-                                }
-
-                                hit = true;
-                                
-                                if(endCount == cardSet.Count/2)
-                                {
-                                    _stopwatch.Stop();
-                                    timer.Stop();
-                                }
-                                endCount++;
-                            }
-                            else
-                            {
-                                img.Source = back_of_card.Source;
-                                img.Name = img.Name.Replace("front", "back");
                                 previousImage.Source = back_of_card.Source;
                                 previousImage.Name = previousImage.Name.Replace("front", "back");
                                 previousImage = null;
-                                hit = true;
+
+                            }
+                            hit = true;
+                        }
+                        if (img.Name.Contains("back"))
+                        {
+                            img.Source = item.Source;
+                            img.Name = img.Name.Replace("back", "front");
+                            hit = false;
+                            if (previousImage != null)
+                            {
+                                if (img.Source == previousImage.Source)
+                                {
+                                    img.Name = img.Name.Replace("front", "z");
+                                    previousImage.Name = previousImage.Name.Replace("front", "z");
+                                    previousImage = null;
+                                    scorePoints = scorePoints + 15;
+                                    T_score.Text = "Score: " + string.Format("{0:0}", ((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds));
+                                    if (((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) >= 100)
+                                    {
+                                        T_score.Foreground = Brushes.Gold;
+                                    }
+                                    if (((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) >= 60 && ((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) < 100)
+                                    {
+                                        T_score.Foreground = Brushes.Green;
+                                    }
+                                    if (((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) >= 30 && ((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) < 60)
+                                    {
+                                        T_score.Foreground = Brushes.Yellow;
+                                    }
+                                    if (((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) >= 0 && ((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) < 30)
+                                    {
+                                        T_score.Foreground = Brushes.Red;
+                                    }
+
+                                    hit = true;
+
+                                    if (endCount == cardSet.Count / 2)
+                                    {
+                                        _stopwatch.Stop();
+                                        timer.Stop();
+                                        winner = true;
+                                    }
+                                    endCount++;
+                                }
+                                else
+                                {
+                                    img.Source = back_of_card.Source;
+                                    img.Name = img.Name.Replace("front", "back");
+                                    previousImage.Source = back_of_card.Source;
+                                    previousImage.Name = previousImage.Name.Replace("front", "back");
+                                    previousImage = null;
+                                    hit = true;
+                                }
                             }
                         }
                     }
@@ -230,14 +262,8 @@ namespace PuzzleGame
         }
         private void BT_apply_Click(object sender, RoutedEventArgs e)
         {
-            Grid settings = G_settings;
-            Grid main = G_mm;
-
-            settings.Visibility = Visibility.Hidden;
-            settings.IsEnabled = false;
-
-            main.Visibility = Visibility.Visible;
-            main.IsEnabled = true;
+            switchGridSettings(false, G_settings);
+            switchGridSettings(true, G_mm);
         }
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
@@ -270,12 +296,57 @@ namespace PuzzleGame
                 {
                     case "2x2":
                         gridSize = "2x2";
+                        BT_6x6.Foreground = Brushes.White;
+                        BT_5x6.Foreground = Brushes.White;
+                        BT_4x5.Foreground = Brushes.White;
+                        BT_4x4.Foreground = Brushes.White;
+                        BT_3x4.Foreground = Brushes.White;
+                        BT_2x2.Foreground = Brushes.Green;
                         break;
                     case "3x4":
                         gridSize = "3x4";
+                        BT_6x6.Foreground = Brushes.White;
+                        BT_5x6.Foreground = Brushes.White;
+                        BT_4x5.Foreground = Brushes.White;
+                        BT_4x4.Foreground = Brushes.White;
+                        BT_3x4.Foreground = Brushes.Green;
+                        BT_2x2.Foreground = Brushes.White;
                         break;
                     case "4x4":
                         gridSize = "4x4";
+                        BT_6x6.Foreground = Brushes.White;
+                        BT_5x6.Foreground = Brushes.White;
+                        BT_4x5.Foreground = Brushes.White;
+                        BT_4x4.Foreground = Brushes.Green;
+                        BT_3x4.Foreground = Brushes.White;
+                        BT_2x2.Foreground = Brushes.White;
+                        break;
+                    case "4x5":
+                        gridSize = "4x5";
+                        BT_6x6.Foreground = Brushes.White;
+                        BT_5x6.Foreground = Brushes.White;
+                        BT_4x5.Foreground = Brushes.Green;
+                        BT_4x4.Foreground = Brushes.White;
+                        BT_3x4.Foreground = Brushes.White;
+                        BT_2x2.Foreground = Brushes.White;
+                        break;
+                    case "5x6":
+                        gridSize = "5x6";
+                        BT_6x6.Foreground = Brushes.White;
+                        BT_5x6.Foreground = Brushes.Green;
+                        BT_4x5.Foreground = Brushes.White;
+                        BT_4x4.Foreground = Brushes.White;
+                        BT_3x4.Foreground = Brushes.White;
+                        BT_2x2.Foreground = Brushes.White;
+                        break;
+                    case "6x6":
+                        gridSize = "6x6";
+                        BT_6x6.Foreground = Brushes.Green;
+                        BT_5x6.Foreground = Brushes.White;
+                        BT_4x5.Foreground = Brushes.White;
+                        BT_4x4.Foreground = Brushes.White;
+                        BT_3x4.Foreground = Brushes.White;
+                        BT_2x2.Foreground = Brushes.White;
                         break;
                     default:
                         MessageBox.Show("Error while processing the request");
@@ -308,6 +379,19 @@ namespace PuzzleGame
         {
             timer.Stop();
             _stopwatch.Stop();
+        }
+        private void BT_backtoMainMenu_Click(object sender, RoutedEventArgs e)
+        {
+            timer.Stop();
+            _stopwatch.Stop();
+            _stopwatch.Reset();
+            T_score.Text = "00:00:00";
+            scorePoints = 0;
+            endCount = 1;
+            previousImage = null;
+            winner = false;
+            switchGridSettings(false, G_contenitore);
+            switchGridSettings(true, G_mm);
         }
     }
 }

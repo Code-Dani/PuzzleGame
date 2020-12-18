@@ -140,6 +140,8 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\cards\19.png" />
+    <Resource Include="Images\cards\20.png" />
     <Content Include="Music\track.wav" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

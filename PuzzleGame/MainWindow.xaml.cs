@@ -33,6 +33,9 @@ namespace PuzzleGame
         private Timer timer;
         private Stopwatch _stopwatch;
         private List<Image> cardSet;
+        private Image previousImage;
+        private int scorePoints = 0;
+        private int endCount = 1;
 
         public MainWindow()
         {
@@ -158,18 +161,10 @@ namespace PuzzleGame
             switchGridSettings(true, G_contenitore);
             switchGridSettings(false, G_mm);
         }
-       
-        
-        
-        
-        
         private void Back_MouseUp(object sender, MouseButtonEventArgs e)
         {
             Image img = (Image)sender;
-            foreach(var item in cardSet)
-            {
-                Console.WriteLine(item.Tag);
-            }
+            bool hit = false;
 
             foreach(var item in cardSet)
             {
@@ -179,13 +174,58 @@ namespace PuzzleGame
                     {
                         img.Source = item.Source;
                         img.Name = img.Name.Replace("back", "front");
-                    }
-                    else
-                    {
-                        img.Source = back_of_card.Source;
-                        img.Name = img.Name.Replace("front", "back");
+                        hit = false;
+                        if (previousImage != null)
+                        {
+                            if (img.Source == previousImage.Source)
+                            {
+                                img.Name = img.Name.Replace("front", "a");
+                                previousImage.Name = previousImage.Name.Replace("front", "a");
+                                previousImage = null;
+                                scorePoints = scorePoints + 15;
+                                T_score.Text = "Score: " + string.Format("{0:0}", ((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds));
+                                if(((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) >= 100)
+                                {
+                                    T_score.Foreground = Brushes.Gold;
+                                }
+                                if(((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) >= 60 && ((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) < 100)
+                                {
+                                    T_score.Foreground = Brushes.Green;
+                                }
+                                if (((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) >= 30 && ((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) < 60)
+                                {
+                                    T_score.Foreground = Brushes.Yellow;
+                                }
+                                if (((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) >= 0 && ((scorePoints * 10) / _stopwatch.Elapsed.TotalSeconds) < 30)
+                                {
+                                    T_score.Foreground = Brushes.Red;
+                                }
+
+                                hit = true;
+                                
+                                if(endCount == cardSet.Count/2)
+                                {
+                                    _stopwatch.Stop();
+                                    timer.Stop();
+                                }
+                                endCount++;
+                            }
+                            else
+                            {
+                                img.Source = back_of_card.Source;
+                                img.Name = img.Name.Replace("front", "back");
+                                previousImage.Source = back_of_card.Source;
+                                previousImage.Name = previousImage.Name.Replace("front", "back");
+                                previousImage = null;
+                                hit = true;
+                            }
+                        }
                     }
                 }
+            }
+            if (hit == false)
+            {
+                previousImage = img;
             }
         }
         private void BT_apply_Click(object sender, RoutedEventArgs e)

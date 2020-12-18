@@ -44,7 +44,7 @@
                 <Label HorizontalAlignment="Center" Content="VOLUME SETTINGS:" FontFamily="Roboto" FontSize="30"></Label>
                 <StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Margin="0,10,0,0">
                     <Label VerticalAlignment="Center" Content="Volume:" FontSize="20" Margin="0,0,10,0"></Label>
-                    <Slider Margin="0,0,10,0" x:Name="volumeBar" ValueChanged="volumeBar_ValueChanged" VerticalAlignment="Center" Height="20" Width="150" TickFrequency="5" Orientation="Horizontal" TickPlacement="BottomRight" Minimum="0" Maximum="100" Value="25" IsSelectionRangeEnabled="True"/>
+                    <Slider Margin="0,0,10,0" x:Name="volumeBar" ValueChanged="volumeBar_ValueChanged" VerticalAlignment="Center" Height="20" Width="150" TickFrequency="5" Orientation="Horizontal" TickPlacement="BottomRight" Minimum="0" Maximum="100" Value="10" IsSelectionRangeEnabled="True"/>
                 </StackPanel>
                 <Label HorizontalAlignment="Center" Margin="0,30,0,0" Content="SCREEN SETTINGS: " FontFamily="Roboto" FontSize="30"></Label>
                 <Button FontSize="40" FontFamily="Roboto" Content="1920x1080" Width="350" Height="75" Margin="0,20,0,0"></Button>
@@ -57,7 +57,8 @@
         <Grid x:Name="G_contenitore" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" IsEnabled="False" Visibility="Hidden">
             <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,5,0,0" Name="G_playfield" Grid.Row="1" IsEnabled="True" Visibility="Visible" Width="640" Height="640">
             </Grid>
-            <TextBlock Width="250" Height="200" FontSize="40" Name="T_timer" Margin="-303,26,693,414" Text="Test" ></TextBlock>
+            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Width="250" Height="200" FontSize="40" Name="T_timer" Margin="15,26,0,0" Text="" ></TextBlock>
+            <TextBlock HorizontalAlignment="Right" VerticalAlignment="Top" Width="250" Height="200" FontSize="40" Name="T_score" Margin="0,26,15,0" Text="Score: 0" ></TextBlock>
         </Grid>
         
         <!--Memory Game, select game mode -->

@@ -31,9 +31,9 @@
         </Grid>
         <!--Memory Game, main menù-->
         <Grid x:Name="G_mm" Grid.Row="1" IsEnabled="True" Visibility="Visible">
-            <StackPanel Margin="0,-150,0,0" VerticalAlignment="Center">
+            <StackPanel Margin="0,-50,0,0" VerticalAlignment="Center">
                 <Button FontFamily="Roboto" Name="BT_play" Content="PLAY" Width="450" Height="100" FontSize="40" Margin="0,0,0,0" Click="BT_play_Click"></Button>
-                <Button FontFamily="Roboto" Name="BT_mode" Content="SELECT GAME MODE" Width="450" Height="100" FontSize="40" Margin="0,20,0,0"></Button>
+                <Button Click="BT_gameModeSelection" FontFamily="Roboto" Name="BT_mode" Content="SELECT GAME MODE" Width="450" Height="100" FontSize="40" Margin="0,20,0,0"></Button>
                 <Button Click="BT_settings_Click" FontFamily="Roboto" Name="BT_settings" Content="SETTINGS" Width="450" Height="100" FontSize="40" Margin="0,20,0,0"></Button>
             </StackPanel>
         </Grid>
@@ -58,6 +58,17 @@
             <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,5,0,0" Name="G_playfield" Grid.Row="1" IsEnabled="True" Visibility="Visible" Width="640" Height="640">
             </Grid>
             <TextBlock Width="250" Height="200" FontSize="40" Name="T_timer" Margin="-303,26,693,414" Text="Test" ></TextBlock>
+        </Grid>
+        
+        <!--Memory Game, select game mode -->
+        <Grid Grid.Row="1" Name="G_gamemode" Visibility="Hidden" IsEnabled="False">
+            <StackPanel Margin="0,0,0,0" VerticalAlignment="Center">
+                <TextBlock Text="SELECT GRID DIFFICULTY:" FontSize="40" HorizontalAlignment="Center" FontFamily="Roboto"></TextBlock>
+                <Button FontFamily="Roboto" Content="2x2" Width="450" Height="100" FontSize="40" Margin="0,20,0,0" Click="BT_gameModeSelection"></Button>
+                <Button FontFamily="Roboto" Content="3x4" Width="450" Height="100" FontSize="40" Margin="0,20,0,0" Click="BT_gameModeSelection"></Button>
+                <Button FontFamily="Roboto" Content="4x4" Width="450" Height="100" FontSize="40" Margin="0,20,0,0" Click="BT_gameModeSelection"></Button>
+                <Button Name="BT_apply_gamemode" Width="200" Height="65" Content="APPLY" FontFamily="Roboto" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="250,50,0,0" Click="BT_gameModeSelection"/>
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

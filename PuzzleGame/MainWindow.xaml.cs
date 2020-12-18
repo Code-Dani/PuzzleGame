@@ -26,13 +26,13 @@ namespace PuzzleGame
     /// </summary>
     public partial class MainWindow : Window
     {
-        private String gridSize = "4x4";
+        private String gridSize = "4x4"; //default size if not modified
         private List<Image> cardPool;
         private Image back_of_card;
         private MediaPlayer player;
         private Timer timer;
         private Stopwatch _stopwatch;
-        
+        private List<Image> cardSet;
 
         public MainWindow()
         {
@@ -46,14 +46,6 @@ namespace PuzzleGame
             defineVariables();
             InitializeComponent();
             player.Play();
-        }
-
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                T_timer.Text = _stopwatch.Elapsed.ToString(@"hh\:mm\:ss");
-            });
         }
 
         public void defineVariables()
@@ -92,27 +84,50 @@ namespace PuzzleGame
             _stopwatch.Start();
             timer.Start();
             cardPool = cardPool.OrderBy(a => Guid.NewGuid()).ToList();  //scramble pool list
-            cardPool = cardPool.OrderBy(a => Guid.NewGuid()).ToList();  //scramble pool list
             //Declarations
             Grid playfield = G_playfield;
             
 
             //creating field            TEMP - WILL BE MOVED INTO A NON SO CALLED METHOD
             int rows = int.Parse(gridSize.Split('x')[0]), columns = int.Parse(gridSize.Split('x')[1]), counter = 0;
+            int _cardsNeeded = (rows * columns) / 2;
 
-            for (int i = 0; i < rows; i++)
+            for (int i = 0; i < columns; i++)
             {
                 var GRIDcolumns = new ColumnDefinition();
                 GRIDcolumns.Width = new GridLength(150);
                 playfield.ColumnDefinitions.Add(GRIDcolumns);
             }
-            for (int j = 0; j < columns; j++)
+            for (int j = 0; j < rows; j++)
             {
                 var GRIDrows = new RowDefinition();
                 GRIDrows.Height = new GridLength(150);
                 playfield.RowDefinitions.Add(GRIDrows);
             }
-            
+            //initialize new card set made for this game
+            cardSet = new List<Image>();
+            int tmp = _cardsNeeded - 1;
+            for (int i = 0; i < _cardsNeeded; i++)
+            {
+                //I'll simply add the firsts evertime since they get scrambled anyway at the start of the code
+                cardPool[i].Tag = i;
+                cardSet.Add(cardPool[i]);
+                //now come the harder part... adding the double.. the thing is that C# binds every object, so if you try to simply add one more of that specific object it'll crash when adding it to the grid so we have to make a new object and trasfer the proprieties :(
+                var tmpIm = new Image()
+                {
+                    Source = cardPool[i].Source,
+                    Width = cardPool[i].Width,
+                    Height = cardPool[i].Height,
+                    Stretch = cardPool[i].Stretch,
+                    Margin = cardPool[i].Margin,
+                    Name = "test" + (tmp + 20),
+                    Tag = cardPool[i].Tag
+                };
+                cardSet.Add(tmpIm);  //obviously this way they'll always end up one next to the other, but to make it simplier we'll just scramble it after
+            }
+
+            cardSet = cardSet.OrderBy(a => Guid.NewGuid()).ToList();
+
             counter = 0; //counter reset
 
             for (int i = 0; i < rows; i++)
@@ -130,7 +145,7 @@ namespace PuzzleGame
                         Tag = counter.ToString()
                     };
                     back.MouseUp += Back_MouseUp;
-                    cardPool[counter].Tag = counter.ToString();
+                    cardSet[counter].Tag = counter.ToString();
 
                     playfield.Children.Add(back);
                     Grid.SetRow(back, i);
@@ -140,21 +155,23 @@ namespace PuzzleGame
             }
 
             //Setting up field
-            G_contenitore.Visibility = Visibility.Visible;
-            G_contenitore.IsEnabled = true;
-            G_mm.Visibility = Visibility.Hidden;
-            G_mm.IsEnabled = false;
-            
+            switchGridSettings(true, G_contenitore);
+            switchGridSettings(false, G_mm);
         }
+       
+        
+        
+        
+        
         private void Back_MouseUp(object sender, MouseButtonEventArgs e)
         {
             Image img = (Image)sender;
-            foreach(var item in cardPool)
+            foreach(var item in cardSet)
             {
                 Console.WriteLine(item.Tag);
             }
 
-            foreach(var item in cardPool)
+            foreach(var item in cardSet)
             {
                 if(img.Tag.ToString() == item.Tag.ToString())
                 {
@@ -171,25 +188,6 @@ namespace PuzzleGame
                 }
             }
         }
-        private void volumeBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            var value = volumeBar.Value/100;
-            player.Volume = value;
-        }
-
-        private void BT_settings_Click(object sender, RoutedEventArgs e)
-        {
-            Grid settings = G_settings;
-            Grid main = G_mm;
-
-            settings.Visibility = Visibility.Visible;
-            settings.IsEnabled = true;
-
-            main.Visibility = Visibility.Hidden;
-            main.IsEnabled = false;
-        }
-
-        #region //Apply button
         private void BT_apply_Click(object sender, RoutedEventArgs e)
         {
             Grid settings = G_settings;
@@ -201,8 +199,71 @@ namespace PuzzleGame
             main.Visibility = Visibility.Visible;
             main.IsEnabled = true;
         }
-        #endregion
-
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                T_timer.Text = _stopwatch.Elapsed.ToString(@"hh\:mm\:ss");
+            });
+        }
+        private void BT_settings_Click(object sender, RoutedEventArgs e)
+        {
+            switchGridSettings(true, G_settings);
+            switchGridSettings(false, G_mm);
+        }
+        private void BT_gameModeSelection(object sender, RoutedEventArgs e)
+        {
+            Button bt = (Button)sender;
+            if (bt.Content.Equals(BT_mode.Content))
+            {
+                switchGridSettings(false, G_mm);
+                switchGridSettings(true, G_gamemode);
+            }
+            if (bt.Content.Equals(BT_apply_gamemode.Content))
+            {
+                switchGridSettings(false, G_gamemode);
+                switchGridSettings(true, G_mm);
+            }
+            if (!bt.Content.Equals(BT_mode.Content) && !bt.Content.Equals(BT_apply_gamemode.Content))
+            {
+                switch (bt.Content)
+                {
+                    case "2x2":
+                        gridSize = "2x2";
+                        break;
+                    case "3x4":
+                        gridSize = "3x4";
+                        break;
+                    case "4x4":
+                        gridSize = "4x4";
+                        break;
+                    default:
+                        MessageBox.Show("Error while processing the request");
+                        break;
+                }
+            }
+        }
+        public void switchGridSettings(bool isEnabled, Grid grid)
+        {
+            switch (isEnabled)
+            {
+                case true:
+                    grid.Visibility = Visibility.Visible;
+                    grid.IsEnabled = true;
+                    break;
+                case false:
+                    grid.Visibility = Visibility.Hidden;
+                    grid.IsEnabled = false;
+                    break;
+                default:
+                    break;
+            }
+        }
+        private void volumeBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            var value = volumeBar.Value / 100;
+            player.Volume = value;
+        }
         private void Window_Closed(object sender, EventArgs e)
         {
             timer.Stop();

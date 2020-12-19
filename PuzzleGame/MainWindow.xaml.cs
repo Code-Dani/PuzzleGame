@@ -180,7 +180,7 @@ namespace PuzzleGame
         {
             Image img = (Image)sender;
             bool hit = false;
-            
+
             Console.WriteLine(img.Source + "\n" + img.Tag);
 
             if (winner != true)

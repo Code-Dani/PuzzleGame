@@ -172,7 +172,7 @@ namespace PuzzleGame
                 count++;
             }
         }
-        private void DSlink_MouseUp(object sender, MouseButtonEventArgs e)
+        private void DSlink_MouseUp(object sender, RequestNavigateEventArgs e)
         {
             Process.Start("https://discord.gg/cHx4kNXpVa");
         }
@@ -392,6 +392,11 @@ namespace PuzzleGame
             winner = false;
             switchGridSettings(false, G_contenitore);
             switchGridSettings(true, G_mm);
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            Process.Start(HL_codeDani.NavigateUri.ToString());
         }
     }
 }
